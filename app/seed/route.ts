@@ -1,8 +1,12 @@
 import bcrypt from 'bcrypt';
-import postgres from 'postgres';
+import { neon, neonConfig } from '@neondatabase/serverless';
 import { invoices, customers, revenue, users } from '../lib/placeholder-data';
+import { WebSocket } from 'ws';
 
-const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
+neonConfig.webSocketConstructor = WebSocket;
+const sql = neon(process.env.DATABASE_URL!, {
+  fetchOptions: { timeout: 6000 },
+});
 
 async function seedUsers() {
   await sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
@@ -23,8 +27,10 @@ async function seedUsers() {
         VALUES (${user.id}, ${user.name}, ${user.email}, ${hashedPassword})
         ON CONFLICT (id) DO NOTHING;
       `;
-    }),
+    })
   );
+
+  console.log('insertedUsers :>> ', insertedUsers);
 
   return insertedUsers;
 }
@@ -48,8 +54,8 @@ async function seedInvoices() {
         INSERT INTO invoices (customer_id, amount, status, date)
         VALUES (${invoice.customer_id}, ${invoice.amount}, ${invoice.status}, ${invoice.date})
         ON CONFLICT (id) DO NOTHING;
-      `,
-    ),
+      `
+    )
   );
 
   return insertedInvoices;
@@ -73,8 +79,8 @@ async function seedCustomers() {
         INSERT INTO customers (id, name, email, image_url)
         VALUES (${customer.id}, ${customer.name}, ${customer.email}, ${customer.image_url})
         ON CONFLICT (id) DO NOTHING;
-      `,
-    ),
+      `
+    )
   );
 
   return insertedCustomers;
@@ -94,8 +100,8 @@ async function seedRevenue() {
         INSERT INTO revenue (month, revenue)
         VALUES (${rev.month}, ${rev.revenue})
         ON CONFLICT (month) DO NOTHING;
-      `,
-    ),
+      `
+    )
   );
 
   return insertedRevenue;
@@ -103,15 +109,19 @@ async function seedRevenue() {
 
 export async function GET() {
   try {
-    const result = await sql.begin((sql) => [
-      seedUsers(),
-      seedCustomers(),
-      seedInvoices(),
-      seedRevenue(),
-    ]);
+    const response = await sql`SELECT version()`;
+    console.log('response :>> ', response);
+    // console.log('env :>> ', process.env.POSTGRES_URL);
+    // console.log('sql :>> ', sql);
+
+    // const result = await sql.begin((sql) => {
+    //   console.log('sql :>> ', sql);
+    // return [seedUsers(), seedCustomers(), seedInvoices(), seedRevenue()];
+    // });
 
     return Response.json({ message: 'Database seeded successfully' });
   } catch (error) {
+    console.log('error :>> ', error);
     return Response.json({ error }, { status: 500 });
   }
 }

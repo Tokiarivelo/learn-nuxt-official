@@ -1,0 +1,42 @@
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+    provider  = "postgresql"
+    url       = env("DATABASE_URL")
+    directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+model Users {
+    id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    email    String  @unique
+    name     String?
+    password String
+}
+
+model Customers {
+    id        String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    name      String
+    email     String @unique
+    image_url String
+
+    invoices Invoices[] // Relation avec Invoice
+}
+
+model Invoices {
+    id          String   @id @default(uuid()) @db.Uuid
+    customer_id String   @db.Uuid
+    amount      Float
+    status      String
+    date        DateTime @default(now()) @db.Date // Utilisation d'un champ Date
+
+    customer Customers @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+}
+
+model Revenue {
+    id      String @id @default(uuid()) @db.Uuid
+    month   String @db.VarChar(4)
+    revenue Float
+}
