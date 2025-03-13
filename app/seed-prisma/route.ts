@@ -71,6 +71,8 @@ export async function GET() {
     await seedInvoices();
     await seedRevenue();
 
+    prisma.$disconnect();
+
     return Response.json({ message: 'Database seeded successfully' });
   } catch (error) {
     console.log('error :>> ', error);
