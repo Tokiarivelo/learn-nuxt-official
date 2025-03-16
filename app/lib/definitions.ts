@@ -87,7 +87,7 @@ export type InvoiceForm = {
   id: string;
   customer_id: string;
   amount: number;
-  status: 'pending' | 'paid';
+  status: string | 'pending' | 'paid';
 };
 
 export type InvoiceWithCustomer = Prisma.InvoicesGetPayload<{
@@ -95,3 +95,5 @@ export type InvoiceWithCustomer = Prisma.InvoicesGetPayload<{
 }> & {
   amount: string; // Override `amount` as a string
 };
+
+export type InvoiceCreateArs = Prisma.InvoicesUncheckedCreateInput;
