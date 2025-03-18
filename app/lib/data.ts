@@ -199,7 +199,7 @@ export async function fetchInvoiceById(id: string) {
     });
 
     if (!invoice) {
-      throw new Error('Invoice not found');
+      return null;
     }
 
     return {

@@ -1,7 +1,7 @@
 'use server';
 
 import { z } from 'zod';
-import { insertInvoice } from './mutation';
+import { deletenvoiceDb, insertInvoice, modifyInvoice } from './mutation';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 
@@ -25,13 +25,51 @@ export async function createInvoice(formData: FormData) {
   const { customerId, amount, status } = CreateInvoice.parse(rawFormData);
 
   const amountInCents = amount * 100;
-  //   const date = new Date().toISOString().split('T')[0];
-  await insertInvoice({
-    customer_id: customerId,
-    amount: amountInCents,
-    status,
-    // date,
-  });
+  try {
+    await insertInvoice({
+      customer_id: customerId,
+      amount: amountInCents,
+      status,
+      // date,
+    });
+  } catch (error) {
+    console.log('error :>> ', error);
+  }
+
+  revalidatePath('/dashboard/invoices');
+  redirect('/dashboard/invoices');
+}
+
+export async function updateInvoice(id: string, formData: FormData) {
+  const rawFormData = {
+    customerId: formData.get('customerId'),
+    amount: formData.get('amount'),
+    status: formData.get('status'),
+  };
+
+  const { customerId, amount, status } = CreateInvoice.parse(rawFormData);
+
+  const amountInCents = amount * 100;
+  try {
+    await modifyInvoice(id, {
+      customer_id: customerId,
+      amount: amountInCents,
+      status,
+      // date,
+    });
+  } catch (error) {
+    console.log('error :>> ', error);
+  }
+
+  revalidatePath('/dashboard/invoices');
+  redirect('/dashboard/invoices');
+}
+
+export async function deleteInvoice(id: string) {
+  throw new Error('Failed to Delete Invoice');
+
+  await deletenvoiceDb(id);
+
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
 }

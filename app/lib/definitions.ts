@@ -96,4 +96,5 @@ export type InvoiceWithCustomer = Prisma.InvoicesGetPayload<{
   amount: string; // Override `amount` as a string
 };
 
-export type InvoiceCreateArs = Prisma.InvoicesUncheckedCreateInput;
+export type InvoiceCreateArgs = Prisma.InvoicesUncheckedCreateInput;
+export type InvoiceUpdateArgs = Prisma.InvoicesUncheckedUpdateInput;
