@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Users } from '@prisma/client';
 import { InvoiceWithCustomer } from './definitions';
 import { formatCurrency } from './utils';
 
@@ -209,5 +209,21 @@ export async function fetchInvoiceById(id: string) {
   } catch (error) {
     console.error('Database Error:', error);
     throw new Error('Failed to fetch invoice.');
+  }
+}
+
+export async function getUser(
+  email: string
+): Promise<Users | null | undefined> {
+  try {
+    const user = await prisma.users.findUnique({
+      where: {
+        email,
+      },
+    });
+    return user;
+  } catch (error) {
+    console.error('Failed to fetch user:', error);
+    throw new Error('Failed to fetch user.');
   }
 }
